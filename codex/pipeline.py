@@ -10,7 +10,7 @@ from codex.analyzer import ComplexityAnalyzer
 from codex.config import AppConfig
 from codex.decomposer import TaskDecomposer
 from codex.executor import DAGExecutor
-from codex.tools import read_file, list_dir, execute_command  # 确保你已经创建了 codex/tools.py
+from codex.tools import read_file, list_dir, execute_command
 from codex.models import (
     TaskState,
     ExecuteRequest,
@@ -70,10 +70,10 @@ class Pipeline:
             # ==========================================
 
             # ==========================================
-            # 🌟 拦截器：OpenClaw 本地管家模式 (带工具循环)
+            # 🌟 OpenClaw 极速管家模式（带人工确认）
             # ==========================================
             if hasattr(request, 'mode') and request.mode == "openclaw":
-                logger.info("🦞 触发 OpenClaw 管家模式：启用本地物理抓手！")
+                logger.info("🦞 触发 OpenClaw 管家模式：启用本地物理抓手（带人工确认）")
 
                 # 伪造评估结果和 DAG（适配前端格式）
                 assessment = ComplexityAssessment(
@@ -143,7 +143,8 @@ class Pipeline:
                         elif tool_name == "list_dir":
                             tool_result = list_dir(tool_arg)
                         elif tool_name == "execute_command":
-                            tool_result = execute_command(tool_arg)
+                            # 🌟 唯一改动：加了 await，会等待你在终端输入 yes 确认
+                            tool_result = await execute_command(tool_arg)
                         else:
                             tool_result = f"系统错误：找不到名为 {tool_name} 的工具。"
 
@@ -174,7 +175,7 @@ class Pipeline:
                     dag=dag, result=result, status="completed",
                 )
             # ==========================================
-            # 🌟 拦截器结束
+            # 🌟 OpenClaw 模式结束
             # ==========================================
 
             # ==========================================
